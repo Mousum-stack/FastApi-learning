@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Path
 import json
 from fastapi import HTTPException
 
@@ -27,7 +27,7 @@ def view():
 
 
 @app.get("/patient/{medical_condition}")
-def view_patient(medical_condition: str):
+def view_patient(medical_condition: str = Path(..., description='Name of the disease in database' , example = 'Cancer')):
 
     data = load_data()
 
