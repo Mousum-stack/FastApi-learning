@@ -12,3 +12,12 @@ def insert_patient_data(patient: Patient):
 patient = Patient(name='Nitish', age=30)
 
 insert_patient_data(patient)
+
+def update_patient_data(patient: Patient):
+    print(patient.name)
+    print(patient.age)
+    print('Updated into database')
+
+patient = Patient(name='Rahul', age=20)
+
+update_patient_data(patient)
