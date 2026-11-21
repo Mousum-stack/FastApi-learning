@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, AnyUrl, Field, field_validator, model_validator
+from pydantic import BaseModel, EmailStr, AnyUrl, Field, field_validator, model_validator, computed_field
 from typing import List, Annotated, Dict, Optional
 
 class Patient(BaseModel):
@@ -6,6 +6,7 @@ class Patient(BaseModel):
     email: EmailStr
     linkedin_url: AnyUrl
     age: int = Field(gt=0, lt=120)
+    height: Annotated[float, Field(gt=0, strict=True)]
     weight: Annotated[float, Field(gt=0, strict=True)]
     married: Annotated[bool, Field(default=False, description='Is the patient married or not')]
     alergies: Optional[List[str]] = None
@@ -43,6 +44,14 @@ class Patient(BaseModel):
             raise ValueError("Patient older than 60 must have an emergency contact")
         return model
     
+    @computed_field
+    @property
+    def bmi(self) -> float:
+        bmi = round(self.weight/(self.height**2),2)
+        return bmi
+    
+    
+    
 def insert_patient_data(patient: Patient):
     print(patient.name)
     print(patient.age)
@@ -50,8 +59,9 @@ def insert_patient_data(patient: Patient):
     print(patient.married)
     print(patient.alergies)
     print(patient.email)
+    print('BMI', patient.bmi)
     print('Inserted into database')
 
-patient = Patient(name='Rahul', email='raj123@icici.com', linkedin_url='https://linkedin.com/1322', age='80', weight=80, married=True, alergies=['pollen', 'dust', 'cinus'], contact_details={'email': 'akku123@gmail.com', 'phn': '1234567891', 'emergency':'123455'})
+patient = Patient(name='Rahul', email='raj123@icici.com', linkedin_url='https://linkedin.com/1322', age='80',height=1.72, weight=80, married=True, alergies=['pollen', 'dust', 'cinus'], contact_details={'email': 'akku123@gmail.com', 'phn': '1234567891', 'emergency':'123455'})
 
 insert_patient_data(patient)
