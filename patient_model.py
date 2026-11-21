@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, AnyUrl, Field
+from pydantic import BaseModel, EmailStr, AnyUrl, Field, field_validator
 from typing import List, Annotated, Dict, Optional
 
 class Patient(BaseModel):
@@ -10,7 +10,32 @@ class Patient(BaseModel):
     married: Annotated[bool, Field(default=False, description='Is the patient married or not')]
     alergies: Optional[List[str]] = None
     contact_details: Dict[str, str]
-
+    
+    @field_validator('email')
+    @classmethod
+    def email_validator(cls, value):
+        
+        valid_domains = ['hdfc.com', 'icici.com']
+        domain_name = value.split('@')[-1]
+        
+        if domain_name not in valid_domains:
+            raise ValueError('Not a valid domain')
+        
+        return value
+    
+    @field_validator('name')
+    @classmethod
+    def transform_name(cls,value):
+        return value.upper()
+    
+    @field_validator('age', mode= 'after')
+    @classmethod
+    def validate_age(cls,value):
+        if 0 < value < 100:
+            return value
+        else:
+            raise ValueError("Age should be in between 0 and 100")
+    
 def insert_patient_data(patient: Patient):
     print(patient.name)
     print(patient.age)
@@ -20,6 +45,6 @@ def insert_patient_data(patient: Patient):
     print(patient.email)
     print('Inserted into database')
 
-patient = Patient(name='Rahul', email='raj123@gmail.com', linkedin_url='https://linkedin.com/1322', age='20', weight=80, married=True, alergies=['pollen', 'dust', 'cinus'], contact_details={'email': 'akku123@gmail.com', 'phn': '1234567891'})
+patient = Patient(name='Rahul', email='raj123@icici.com', linkedin_url='https://linkedin.com/1322', age='20', weight=80, married=True, alergies=['pollen', 'dust', 'cinus'], contact_details={'email': 'akku123@gmail.com', 'phn': '1234567891'})
 
 insert_patient_data(patient)
