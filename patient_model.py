@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, AnyUrl, Field, field_validator
+from pydantic import BaseModel, EmailStr, AnyUrl, Field, field_validator, model_validator
 from typing import List, Annotated, Dict, Optional
 
 class Patient(BaseModel):
@@ -35,6 +35,13 @@ class Patient(BaseModel):
             return value
         else:
             raise ValueError("Age should be in between 0 and 100")
+        
+        
+    @model_validator(mode='after')
+    def validate_emergency_contact(cls,model):
+        if model.age > 60 and 'emergency' not in model.contact_details:
+            raise ValueError("Patient older than 60 must have an emergency contact")
+        return model
     
 def insert_patient_data(patient: Patient):
     print(patient.name)
@@ -45,6 +52,6 @@ def insert_patient_data(patient: Patient):
     print(patient.email)
     print('Inserted into database')
 
-patient = Patient(name='Rahul', email='raj123@icici.com', linkedin_url='https://linkedin.com/1322', age='20', weight=80, married=True, alergies=['pollen', 'dust', 'cinus'], contact_details={'email': 'akku123@gmail.com', 'phn': '1234567891'})
+patient = Patient(name='Rahul', email='raj123@icici.com', linkedin_url='https://linkedin.com/1322', age='80', weight=80, married=True, alergies=['pollen', 'dust', 'cinus'], contact_details={'email': 'akku123@gmail.com', 'phn': '1234567891', 'emergency':'123455'})
 
 insert_patient_data(patient)
