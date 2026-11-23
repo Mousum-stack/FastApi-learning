@@ -1,5 +1,4 @@
 from fastapi import FastAPI, Path, HTTPException, Query
-from fastapi.responses import JSONResponse
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field, computed_field
 from datetime import date
@@ -40,7 +39,7 @@ class Patient(BaseModel):
     ]
 
     medical_condition: str
-    date_of_admission: str
+    date_of_admission: date
     doctor: str
     hospital: str
     insurance_provider: str
@@ -56,7 +55,7 @@ class Patient(BaseModel):
     ]
 
     admission_type: Literal["Emergency", "Urgent", "Elective"]
-    discharge_date: str
+    discharge_date: date
     medication: str
     test_results: Literal["Normal", "Abnormal", "Inconclusive"]
     
@@ -82,9 +81,21 @@ def load_data():
         
     return data
 
+
 def save_data(data):
     with open("healthcare_dataset.json", "w") as f:
         json.dump(data, f, indent=4)
+
+
+def add_patient_ids():
+
+    data = load_data()
+
+    for patient in data:
+        if "patient_id" not in patient:
+            patient["patient_id"] = str(uuid4())
+
+    save_data(data)
 
 @app.get("/")
 def hello():
@@ -103,7 +114,7 @@ def view():
 
 
 @app.get("/patient/{medical_condition}")
-def view_patient(medical_condition: str = Path(..., description='Name of the disease in database' , example = ['Cancer'])):
+def view_patient(medical_condition: str = Path(..., description='Name of the disease in database' , examples = ['Cancer'])):
 
     data = load_data()
 
@@ -142,22 +153,29 @@ def sort_patients(sort_by: str = Query(..., description="Field to sort by: Age, 
 )
     return sorted_data
 
-@app.post('/create')
+@app.post("/create", status_code=201)
 def create_patient(patient: Patient):
-    # load existing data
-    #check if the patient already in the database
-    # new patient added to the database
-    
+
     data = load_data()
-    
-    if patient.patient_id in data:
-        raise HTTPException(status_code=400, detail='Patient already exist')
-    
-    #new patient add to the database
-    
-    data.append(patient.model_dump(mode="json"))
-    
+
+    # Check whether patient ID already exists
+    if any(
+        existing_patient.get("patient_id") == str(patient.patient_id)
+        for existing_patient in data
+    ):
+        raise HTTPException(
+            status_code=409,
+            detail="Patient ID already exists"
+        )
+
+    # Add new patient
+    new_patient = patient.model_dump(mode="json")
+    data.append(new_patient)
+
+    # Save updated data
     save_data(data)
-    
-    
-    return JSONResponse(status_code=201, content={'message':'patient Created successfully'})
+
+    return {
+        "message": "Patient created successfully",
+        "patient": new_patient
+    }
