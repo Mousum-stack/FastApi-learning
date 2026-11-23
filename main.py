@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Path, HTTPException, Query
+from fastapi.responses import JSONResponse
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field, computed_field
 from datetime import date
@@ -81,6 +82,10 @@ def load_data():
         
     return data
 
+def save_data(data):
+    with open("healthcare_dataset.json", "w") as f:
+        json.dump(data, f, indent=4)
+
 @app.get("/")
 def hello():
     return {"message" : "Patient Management Syatem API"}
@@ -145,4 +150,14 @@ def create_patient(patient: Patient):
     
     data = load_data()
     
-    if patient_id in data
+    if patient.patient_id in data:
+        raise HTTPException(status_code=400, detail='Patient already exist')
+    
+    #new patient add to the database
+    
+    data.append(patient.model_dump(mode="json"))
+    
+    save_data(data)
+    
+    
+    return JSONResponse(status_code=201, content={'message':'patient Created successfully'})
