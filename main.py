@@ -1,8 +1,28 @@
 from fastapi import FastAPI, Path, HTTPException, Query
+from pydantic import BaseModel
 import json
 from fastapi import HTTPException
 
 app = FastAPI()
+
+from pydantic import BaseModel
+
+class Patient(BaseModel):
+    name: str
+    age: int
+    gender: str
+    blood_group: str
+    medical_condition: str
+    date_of_admission: str
+    doctor: str
+    hospital: str
+    insurance_provider: str
+    billing_amount: float
+    room_number: int
+    admission_type: str
+    discharge_date: str
+    medication: str
+    test_results: str
 
 def load_data():
     with open('healthcare_dataset.json', 'r') as f:
@@ -15,7 +35,7 @@ def hello():
     return {"message" : "Patient Management Syatem API"}
 
 @app.get("/about")
-def about():
+def about(): 
     return{"A Fully functional API to manage records"}
 
 @app.get("/view")
