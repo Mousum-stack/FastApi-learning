@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Path, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from typing import Annotated
 import json
 from fastapi import HTTPException
 
@@ -9,7 +10,7 @@ from pydantic import BaseModel
 
 class Patient(BaseModel):
     name: str
-    age: int
+    age: Annotated[int, Field(..., description="Age should be Greater than 0", gt=0)]
     gender: str
     blood_group: str
     medical_condition: str
