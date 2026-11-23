@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Path, HTTPException, Query
 from pydantic import BaseModel, Field
-from typing import Annotated
+from typing import Annotated, Literal
 import json
 from fastapi import HTTPException
 
@@ -9,8 +9,8 @@ app = FastAPI()
 from pydantic import BaseModel
 
 class Patient(BaseModel):
-    name: str
-    age: Annotated[int, Field(..., description="Age should be Greater than 0", gt=0)]
+    name: Annotated[str, Field(..., description="Patient Name", examples='Raj')]
+    age: Annotated[int, Field(..., description="Age should be Greater than 0", gt=0, lt=120)]
     gender: str
     blood_group: str
     medical_condition: str
