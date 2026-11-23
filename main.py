@@ -12,7 +12,7 @@ class Patient(BaseModel):
     name: Annotated[str, Field(..., description="Patient Name", examples='Raj')]
     age: Annotated[int, Field(..., description="Age should be Greater than 0", gt=0, lt=120)]
     gender: Annotated[Literal['male', 'female', 'others'], Field(str, ..., description="Gender of the patient")]
-    blood_group: str
+    blood_group: Annotated[Literal["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", 'O-']]
     medical_condition: str
     date_of_admission: str
     doctor: str
