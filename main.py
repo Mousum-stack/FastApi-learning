@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Path, HTTPException, Query
-from pydantic import BaseModel, Field
+from uuid import UUID, uuid4
+from pydantic import BaseModel, Field, computed_field
+from datetime import date
 from typing import Annotated, Literal
 import json
 from fastapi import HTTPException
@@ -8,22 +10,70 @@ app = FastAPI()
 
 from pydantic import BaseModel
 
+from pydantic import BaseModel, Field
+from typing import Annotated, Literal
+
+
 class Patient(BaseModel):
-    name: Annotated[str, Field(..., description="Patient Name", examples='Raj')]
-    age: Annotated[int, Field(..., description="Age should be Greater than 0", gt=0, lt=120)]
-    gender: Annotated[Literal['male', 'female', 'others'], Field(str, ..., description="Gender of the patient")]
-    blood_group: Annotated[Literal["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", 'O-']]
+    
+    patient_id: UUID = Field(default_factory=uuid4)
+
+    name: Annotated[
+        str,
+        Field(..., description="Patient Name", examples=["Raj"])
+    ]
+
+    age: Annotated[
+        int,
+        Field(..., description="Age should be greater than 0 and less than 120", gt=0, lt=120)
+    ]
+
+    gender: Annotated[
+        Literal["male", "female", "others"],
+        Field(..., description="Gender of the patient")
+    ]
+
+    blood_group: Annotated[
+        Literal["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
+        Field(..., description="Blood group of the patient")
+    ]
+
     medical_condition: str
     date_of_admission: str
     doctor: str
     hospital: str
     insurance_provider: str
-    billing_amount: float
-    room_number: int
-    admission_type: str
+
+    billing_amount: Annotated[
+        float,
+        Field(..., description="Patient billing amount", ge=0)
+    ]
+
+    room_number: Annotated[
+        int,
+        Field(..., description="Patient room number", gt=0)
+    ]
+
+    admission_type: Literal["Emergency", "Urgent", "Elective"]
     discharge_date: str
     medication: str
-    test_results: str
+    test_results: Literal["Normal", "Abnormal", "Inconclusive"]
+    
+    @computed_field
+    @property
+    def hospital_stay_days(self) -> int:
+        return (self.discharge_date - self.date_of_admission).days
+    
+    
+    @computed_field
+    @property
+    def billing_category(self) -> str:
+        if self.billing_amount < 2000:
+            return "Low"
+        elif self.billing_amount <= 40000:
+            return "Medium"
+        else:
+            return "High"
 
 def load_data():
     with open('healthcare_dataset.json', 'r') as f:
@@ -86,3 +136,13 @@ def sort_patients(sort_by: str = Query(..., description="Field to sort by: Age, 
     reverse=sort_order
 )
     return sorted_data
+
+@app.post('/create')
+def create_patient(patient: Patient):
+    # load existing data
+    #check if the patient already in the database
+    # new patient added to the database
+    
+    data = load_data()
+    
+    if patient_id in data
