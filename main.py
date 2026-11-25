@@ -2,7 +2,7 @@ from fastapi import FastAPI, Path, HTTPException, Query
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field, computed_field
 from datetime import date
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Optional
 import json
 from fastapi import HTTPException
 
@@ -58,6 +58,49 @@ class Patient(BaseModel):
     discharge_date: date
     medication: str
     test_results: Literal["Normal", "Abnormal", "Inconclusive"]
+    
+    
+    class PatientUpdate(BaseModel):
+
+    name: Optional[str] = None
+
+    age: Annotated[
+        Optional[int],
+        Field(default=None, gt=0, lt=120)
+    ]
+
+    gender: Optional[Literal["male", "female", "others"]] = None
+
+    blood_group: Optional[
+        Literal["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+    ] = None
+
+    medical_condition: Optional[str] = None
+    date_of_admission: Optional[date] = None
+    doctor: Optional[str] = None
+    hospital: Optional[str] = None
+    insurance_provider: Optional[str] = None
+
+    billing_amount: Annotated[
+        Optional[float],
+        Field(default=None, ge=0)
+    ]
+
+    room_number: Annotated[
+        Optional[int],
+        Field(default=None, gt=0)
+    ]
+
+    admission_type: Optional[
+        Literal["Emergency", "Urgent", "Elective"]
+    ] = None
+
+    discharge_date: Optional[date] = None
+    medication: Optional[str] = None
+
+    test_results: Optional[
+        Literal["Normal", "Abnormal", "Inconclusive"]
+    ] = None
     
     @computed_field
     @property
@@ -157,7 +200,7 @@ def sort_patients(sort_by: str = Query(..., description="Field to sort by: Age, 
 def create_patient(patient: Patient):
 
     data = load_data()
-
+    print("Incoming Patient ID:", patient.patient_id)
     # Check whether patient ID already exists
     if any(
         existing_patient.get("patient_id") == str(patient.patient_id)
@@ -179,3 +222,6 @@ def create_patient(patient: Patient):
         "message": "Patient created successfully",
         "patient": new_patient
     }
+    
+    @app.put('/edit/{patient_id}')
+    def update_patient
