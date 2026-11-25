@@ -224,4 +224,36 @@ def create_patient(patient: Patient):
     }
     
     @app.put('/edit/{patient_id}')
-    def update_patient
+def update_patient(patient_id: UUID, patient_update: PatientUpdate):
+
+    data = load_data()
+
+    # Find the patient
+    patient_found = False
+
+    for patient in data:
+        if patient.get("patient_id") == str(patient_id):
+
+            # Get only the fields supplied by the client
+            update_data = patient_update.model_dump(exclude_unset=True)
+
+            # Update the existing patient record
+            patient.update(update_data)
+
+            patient_found = True
+            break
+
+    # If patient doesn't exist
+    if not patient_found:
+        raise HTTPException(
+            status_code=404,
+            detail="Patient not found"
+        )
+
+    # Save updated data
+    save_data(data)
+
+    return {
+        "message": "Patient updated successfully",
+        "patient": patient
+    }
