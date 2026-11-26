@@ -60,7 +60,7 @@ class Patient(BaseModel):
     test_results: Literal["Normal", "Abnormal", "Inconclusive"]
     
     
-    class PatientUpdate(BaseModel):
+class PatientUpdate(BaseModel):
 
     name: Optional[str] = None
 
@@ -196,7 +196,6 @@ def sort_patients(sort_by: str = Query(..., description="Field to sort by: Age, 
 )
     return sorted_data
 
-
 @app.post("/create", status_code=201)
 def create_patient(patient: Patient):
 
@@ -224,9 +223,7 @@ def create_patient(patient: Patient):
         "patient": new_patient
     }
     
-    
-    # code for edit
-    @app.put('/edit/{patient_id}')
+@app.put('/edit/{patient_id}')
 def update_patient(patient_id: UUID, patient_update: PatientUpdate):
 
     data = load_data()
