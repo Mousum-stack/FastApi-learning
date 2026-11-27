@@ -288,3 +288,18 @@ def delete_patient(patient_id: UUID):
         "message": "Patient deleted successfully",
         "patient": deleted_patient
     }
+    
+    
+@app.get("/patient/{patient_id}")
+def get_patient(patient_id: UUID):
+
+    data = load_data()
+
+    for patient in data:
+        if patient.get("patient_id") == str(patient_id):
+            return patient
+
+    raise HTTPException(
+        status_code=404,
+        detail="Patient not found"
+    )
